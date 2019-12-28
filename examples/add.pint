@@ -1,0 +1,8 @@
+def add(p, q):
+  r = p + q
+  return r
+
+a = int(input())
+b = int(input())
+c = add(a,b)
+print(c)

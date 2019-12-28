@@ -1,0 +1,11 @@
+def fac(n):
+  if n < 2:
+    return 1
+  f = n - 1
+  f = fac(f)
+  f = f * n
+  return f
+
+n = int(input())
+n = fac(n)
+print(n)

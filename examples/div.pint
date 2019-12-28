@@ -1,0 +1,35 @@
+def positiveDivide(dividend, divisor):
+  if dividend < divisor:
+    return 0, dividend
+  doubledivisor = divisor * 2
+  halfquotient, remainder = divide(dividend, doubledivisor)
+  quotient = halfquotient * 2
+  if remainder >= divisor:
+    divisor *= -1
+    remainder += divisor
+    quotient += 1
+  return quotient, remainder
+
+def divide(dividend, divisor):
+  if divisor == 0:
+    return 0, dividend
+  quotientSign = 1
+  remainderSign = 1
+  if dividend < 0:
+    dividend *= -1
+    quotientSign *= -1
+    remainderSign *= -1
+  if divisor < 0:
+    divisor *= -1
+    quotientSign *= -1
+  quotient, remainder = positiveDivide(dividend, divisor)
+  quotient *= quotientSign
+  remainder *= remainderSign
+  return quotient, remainder
+
+
+a = input()
+b = input()
+c, d = divide(a, b)
+output(c)
+output(d)

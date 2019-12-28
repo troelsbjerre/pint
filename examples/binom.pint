@@ -1,0 +1,16 @@
+def binom(n, m):
+  if m == 0:
+    return 1
+  if m == n:
+    return 1
+  n -= 1
+  r = binom(n, m)
+  m -= 1
+  s = binom(n, m)
+  r += s
+  return r
+
+a = int(input())
+b = int(input())
+c = binom(a, b)
+print(c)

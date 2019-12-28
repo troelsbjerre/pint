@@ -1,0 +1,7 @@
+current = input()
+to = input()
+step = input()
+if step > 0:
+  while current < to:
+    output(current)
+    current += step
