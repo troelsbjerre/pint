@@ -1,7 +1,6 @@
 # pint
 
-## A simple compiler from at subset of Python to IntCode, as defined in [Advent of
-Code 2019](https://adventofcode.com/2019/day/9). 
+## A simple compiler from at subset of Python to IntCode, as defined in [Advent of Code 2019](https://adventofcode.com/2019/day/9). 
 
 ## Use
 
