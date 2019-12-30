@@ -19,6 +19,9 @@ pub run intcode.dart div.int
 ## Caveats
 
 The compiler is written in Dart, but is otherwise entirely (s)elf contained.
+It supports functions (with multiple arguments and multiple return values), but
+other than that, it is only a small step beyond an assembler. It cannot parse
+complicated expressions; most lines of code are one-to-one IntCode instructions
 There is currently very little feedback in terms of static analysis, so it is
 highly recommended to compile to python (by specifying a `.py` file as output:
 `pintc source.pint target.py`) and using tools for python to debug. For most
