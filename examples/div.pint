@@ -2,7 +2,7 @@ def positiveDivide(dividend, divisor):
   if dividend < divisor:
     return 0, dividend
   doubledivisor = divisor * 2
-  halfquotient, remainder = divide(dividend, doubledivisor)
+  halfquotient, remainder = positiveDivide(dividend, doubledivisor)
   quotient = halfquotient * 2
   if remainder >= divisor:
     divisor *= -1
