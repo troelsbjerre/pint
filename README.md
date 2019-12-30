@@ -6,11 +6,15 @@
 
 You must have [Dart](https://dart.dev) installed. If you clone this repository, you can compile with:
 
-```pub run pintc.dart examples/div.pint div.int```
+```
+pub run pintc.dart examples/div.pint div.int
+```
 
 and then use your own IntCode interpreter to run the generated `div.int` program, or use the one included here, by running:
 
-```pub run intcode.dart div.int```
+```
+pub run intcode.dart div.int
+```
 
 ## Caveats
 
@@ -36,27 +40,37 @@ implicit globals have not been implemented yet.
 
 Addition and multiplication, where the operands can also be (positive/negative) constants
 
-```a = b + c
-a = b * c```
+```
+a = b + c
+a = b * c
+```
 
 This includes the shorthand
 
-```a += b
-a *= b```
+```
+a += b
+a *= b
+```
 
 Or simply assignment
 
-```a = b```
+```
+a = b
+```
 
 ### Input and output
 
-```a = input()
-output(a)```
+```
+a = input()
+output(a)
+```
 
 Alternatively, to be consistent with generated Python:
 
-```a = int(input())
-print(a)```
+```
+a = int(input())
+print(a)
+```
 
 ### Blocks
 
@@ -69,23 +83,29 @@ part of the main program.
 
 Simple `if`:
 
-```if a < b:
-  max = b```
+```
+if a < b:
+  max = b
+```
 
 Currently, `else` and `elif` is not supported
 
 Simple `while`:
 
-```while a < b:
+```
+while a < b:
   sum += a
-  a += 1```
+  a += 1
+```
 
 ### Function declaration
 
-```def max(a, b):
+```
+def max(a, b):
   if a < b:
     return b
-  return a```
+  return a
+```
 
 The `def` must not be indented.
 
