@@ -147,4 +147,4 @@ if digit < '0':
 digit -= '0'
 ```
 
-see [examples/ascii.pint] for more inspiration
+see [examples/ascii.pint](examples/ascii.pint) for more inspiration
