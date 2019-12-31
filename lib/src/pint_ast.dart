@@ -1,5 +1,6 @@
 import 'util.dart';
 import 'dart:math';
+import 'dart:convert';
 
 abstract class Instruction {
   Instruction();
@@ -182,7 +183,7 @@ class Input extends Instruction {
 }
 
 var outputRegExp =
-    RegExp(r'^(?<indent> *)(print|output)\((?<arg>([A-Za-z]+|-?[0-9]+))\)$');
+    RegExp(r"^(?<indent> *)(print|output) *\( *(?<arg>('.*'|[A-Za-z]+|-?[0-9]+)) *\) *$");
 
 class Output extends Instruction {
   String arg;
@@ -197,7 +198,7 @@ class Output extends Instruction {
   }
 
   @override
-  Iterable<String> get readVariables => BigInt.tryParse(arg) == null ? [arg] : [];
+  Iterable<String> get readVariables => RegExp(r'^[A-Za-z]*$').hasMatch(arg) ? [arg] : [];
 
   @override
   Iterable<String> get writeVariables => [];
@@ -214,15 +215,19 @@ class Output extends Instruction {
     if (val != null) {
       return [B(104), val];
     } else {
-      var offset = globals[arg];
-      if (offset != null) {
-        return [B(4), B(offset)];
+      if (arg[0] == "'") {
+        return jsonDecode('"${arg.substring(1,arg.length-1)}"').toString().codeUnits.expand((c) => [B(104), B(c)]).toList();
       } else {
-        offset = locals[arg];
-        if (offset == null) {
-          locals[arg] = offset = locals.length;
+        var offset = globals[arg];
+        if (offset != null) {
+          return [B(4), B(offset)];
+        } else {
+          offset = locals[arg];
+          if (offset == null) {
+            locals[arg] = offset = locals.length;
+          }
+          return [B(204), B(offset)];
         }
-        return [B(204), B(offset)];
       }
     }
   }
