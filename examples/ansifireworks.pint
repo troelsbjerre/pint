@@ -1,0 +1,59 @@
+def format(number):
+  if number == 0:
+    print('0')
+  if number < 0:
+    print('-')
+    number *= -1
+  printDigits(number)
+
+def printDigits(number):
+  quotient, remainder = divide(number, 10)
+  if quotient > 0:
+    printDigits(quotient)
+  remainder += '0'
+  print(remainder)
+
+def divide(dividend, divisor):
+  if dividend < divisor:
+    return 0, dividend
+  doubledivisor = divisor * 2
+  halfquotient, remainder = divide(dividend, doubledivisor)
+  quotient = halfquotient * 2
+  if remainder >= divisor:
+    divisor *= -1
+    remainder += divisor
+    quotient += 1
+  return quotient, remainder
+
+mod = 1000003
+mul = 425251
+rand = mul
+def random(range):
+  rand *= mul
+  res,res = divide(rand, range)
+  rand,rand = divide(rand, mod)
+  return res
+
+print(27)
+print('[2J')
+while 1 == 1:
+  rep = 100
+  while rep > 0:
+    rep -= 1
+    row = random(40)
+    col = random(140)
+    c = random(256)
+    print(27)
+    print('[')
+    format(row)
+    print(';')
+    format(col)
+    print('H')
+    print(27)
+    print('[')
+    format(c)
+    print('m')
+    print('*')
+    print(27)
+    print('[H')
+  ignore = input()
