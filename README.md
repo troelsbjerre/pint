@@ -84,6 +84,9 @@ part of the main program.
 
 ### Conditionals
 
+Conditional depend on boolean expressions, which are here restricted to two
+operands and the operations `<`, `<=`, `>`, `>=`, `==`, and `!=`.
+
 Simple `if`:
 
 ```
@@ -130,3 +133,18 @@ def divide(dividend, divisor):
     quotient += 1
   return quotient, remainder
 ```
+
+### Ascii support
+
+Constants can in general be replace by a single quoted char, which then takes
+the Ascii value of that char (in general, the Utf-16 code of the char). This
+means you can write:
+
+```
+if digit < '0':
+  result *= sign
+  return result
+digit -= '0'
+```
+
+see [examples/ascii.pint] for more inspiration
