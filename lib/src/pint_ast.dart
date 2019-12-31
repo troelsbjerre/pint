@@ -5,7 +5,7 @@ import 'dart:convert';
 BigInt tryParseBigIntOrChar(String input) {
   var bi = BigInt.tryParse(input);
   if (bi != null) return bi;
-  if (input.length < 3) return null;
+  if (input.length < 3 || input[0] != "'" || input[input.length - 1] != "'") return null;
   var js = jsonDecode('"${input.substring(1,input.length-1)}"').toString();
   if (js.length != 1) return null;
   return B(js.codeUnitAt(0));
