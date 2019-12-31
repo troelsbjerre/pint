@@ -2,6 +2,15 @@ import 'util.dart';
 import 'dart:math';
 import 'dart:convert';
 
+BigInt tryParseBigIntOrChar(String input) {
+  var bi = BigInt.tryParse(input);
+  if (bi != null) return bi;
+  if (input.length < 3) return null;
+  var js = jsonDecode('"${input.substring(1,input.length-1)}"').toString();
+  if (js.length != 1) return null;
+  return B(js.codeUnitAt(0));
+}
+
 abstract class Instruction {
   Instruction();
 
@@ -50,7 +59,7 @@ abstract class Block extends Instruction {
 }
 
 var opRegExp = RegExp(
-    r'^(?<indent> *)(?<target>[A-Za-z]+) (?<assign>=|\+=|-=|\*=) (?<left>[A-Za-z]+|-?[0-9]+)( (?<op>[-+*]) (?<right>[A-Za-z]+|-?[0-9]+))?$');
+    r"^(?<indent> *)(?<target>[A-Za-z]+) (?<assign>=|\+=|-=|\*=) (?<left>'.*'|[A-Za-z]+|-?[0-9]+)( (?<op>[-+*]) (?<right>'.*'|[A-Za-z]+|-?[0-9]+))?$");
 
 class Op extends Instruction {
   String target, left, right, op;
@@ -67,11 +76,12 @@ class Op extends Instruction {
       left = target;
     }
     if (op == '-') {
-      if (BigInt.tryParse(right) == null) {
+      var rval = tryParseBigIntOrChar(right);
+      if (rval == null) {
         throw 'Cannot subtract variable:\n${match.input}';
       }
       op = '+';
-      right = '-$right';
+      right = '${-rval}';
     } else if (op == null) {
       op = '+';
       right = '0';
@@ -98,7 +108,7 @@ class Op extends Instruction {
   List<BigInt> encode(Map<String, int> locals, Map<String, int> globals,
       Map<String, Definition> functions, int opnum) {
     var code = [op == '+' ? B(1) : B(2), null, null, null];
-    var val = BigInt.tryParse(left);
+    var val = tryParseBigIntOrChar(left);
     if (val != null) {
       code[1] = val;
       code[0] += B(100);
@@ -113,7 +123,7 @@ class Op extends Instruction {
         code[0] += B(200);
       }
     }
-    val = BigInt.tryParse(right);
+    val = tryParseBigIntOrChar(right);
     if (val != null) {
       code[2] = val;
       code[0] += B(1000);
@@ -183,7 +193,7 @@ class Input extends Instruction {
 }
 
 var outputRegExp =
-    RegExp(r"^(?<indent> *)(print|output) *\( *(?<arg>('.*'|[A-Za-z]+|-?[0-9]+)) *\) *$");
+    RegExp(r"^(?<indent> *)(print|output) *\( *(?<arg>'.*'|[A-Za-z]+|-?[0-9]+) *\) *$");
 
 class Output extends Instruction {
   String arg;
@@ -211,7 +221,7 @@ class Output extends Instruction {
   @override
   List<BigInt> encode(Map<String, int> locals, Map<String, int> globals,
       Map<String, Definition> functions, int opnum) {
-    var val = BigInt.tryParse(arg);
+    var val = tryParseBigIntOrChar(arg);
     if (val != null) {
       return [B(104), val];
     } else {
@@ -234,7 +244,7 @@ class Output extends Instruction {
 }
 
 var condRegExp = RegExp(
-    r'^(?<indent> *)(?<control>if|while) (?<left>[A-Za-z]+|-?[0-9]+) (?<op>==|!=|<|>|<=|>=) (?<right>[A-Za-z]+|-?[0-9]+):$');
+    r"^(?<indent> *)(?<control>if|while) (?<left>'.*'|[A-Za-z]+|-?[0-9]+) (?<op>==|!=|<|>|<=|>=) (?<right>'.*'|[A-Za-z]+|-?[0-9]+):$");
 
 class Conditional extends Block {
   String control, left, right, op;
@@ -252,7 +262,7 @@ class Conditional extends Block {
   }
 
   @override
-  Iterable<String> get readVariables => [left, right].where((exp) => BigInt.tryParse(exp) == null);
+  Iterable<String> get readVariables => [left, right].where((exp) => tryParseBigIntOrChar(exp) == null);
 
   @override
   Iterable<String> get writeVariables => [];
@@ -276,8 +286,8 @@ class Conditional extends Block {
     }
     var codes = [
       B0,
-      BigInt.tryParse(left),
-      BigInt.tryParse(right),
+      tryParseBigIntOrChar(left),
+      tryParseBigIntOrChar(right),
       B(globals['_cmp']),
       B(1000),
       B(globals['_cmp']),
@@ -407,7 +417,7 @@ class Definition extends Block {
 }
 
 var callRegExp = RegExp(
-    r'^(?<indent> *)((?<target>[A-Za-z]+( *, *[A-Za-z]+)*) = )?(?<name>[A-Za-z]+)\((?<args>([A-Za-z]+|-?[0-9]+)( *, *([A-Za-z]+|-?[0-9]+))*)?\)$');
+    r"^(?<indent> *)((?<target>[A-Za-z]+( *, *[A-Za-z]+)*) = )?(?<name>[A-Za-z]+)\((?<args>('.*'|[A-Za-z]+|-?[0-9]+)( *, *('.*'|[A-Za-z]+|-?[0-9]+))*)?\)$");
 
 class Call extends Instruction {
   String name;
@@ -425,7 +435,7 @@ class Call extends Instruction {
   }
 
   @override
-  Iterable<String> get readVariables => args.where((arg) => BigInt.tryParse(arg) == null);
+  Iterable<String> get readVariables => args.where((arg) => tryParseBigIntOrChar(arg) == null);
 
   @override
   Iterable<String> get writeVariables => targets;
@@ -446,7 +456,7 @@ class Call extends Instruction {
     for (var i = 0 ; i < args.length ; ++i) {
       var code = [
         B(21001),
-        BigInt.tryParse(args[i]),
+        tryParseBigIntOrChar(args[i]),
         B(0),
         B(locals.length + 1 + i)
       ];
@@ -487,7 +497,7 @@ class Call extends Instruction {
 }
 
 var returnRegExp = RegExp(
-    r'^(?<indent> *)return( +(?<expr>([A-Za-z]+|-?[0-9]+)( *, *([A-Za-z]+|-?[0-9]+))*))? *$');
+    r"^(?<indent> *)return( +(?<expr>('.*'|[A-Za-z]+|-?[0-9]+)( *, *('.*'|[A-Za-z]+|-?[0-9]+))*))? *$");
 
 class Return extends Instruction {
   List<String> expr;
@@ -502,7 +512,7 @@ class Return extends Instruction {
   }
 
   @override
-  Iterable<String> get readVariables => expr.where((exp) => BigInt.tryParse(exp) == null).toList();
+  Iterable<String> get readVariables => expr.where((exp) => tryParseBigIntOrChar(exp) == null).toList();
 
   @override
   Iterable<String> get writeVariables => [];
@@ -519,7 +529,7 @@ class Return extends Instruction {
     for (var i = 0; i < expr.length; ++i) {
       var code = [
         B(21001),
-        BigInt.tryParse(expr[i]),
+        tryParseBigIntOrChar(expr[i]),
         B(0),
         B(locals['_return_$i'])
       ];

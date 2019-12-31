@@ -41,4 +41,7 @@ void main() {
   test('binom.pint', () {
     expect(runIntCodeFromFile('examples/binom.pint', [B(10), B(5)]), [B(252)]);
   });
+  test('hello.pint', () {
+    expect(runIntCodeFromFile('examples/hello.pint', []), 'Hello, World!\n'.codeUnits.map((c) => BigInt.from(c)).toList());
+  });
 }

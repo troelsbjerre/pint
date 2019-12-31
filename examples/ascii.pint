@@ -1,0 +1,82 @@
+def format(number):
+  if number == 0:
+    print('0')
+  if number < 0:
+    print('-')
+    number *= -1
+  printDigits(number)
+
+def printDigits(number):
+  quotient, remainder = divide(number, 10)
+  if quotient > 0:
+    printDigits(quotient)
+  remainder += '0'
+  print(remainder)
+
+def divide(dividend, divisor):
+  if dividend < divisor:
+    return 0, dividend
+  doubledivisor = divisor * 2
+  halfquotient, remainder = divide(dividend, doubledivisor)
+  quotient = halfquotient * 2
+  if remainder >= divisor:
+    divisor *= -1
+    remainder += divisor
+    quotient += 1
+  return quotient, remainder
+
+def parseInt():
+  result = 0
+  sign = 1
+  digit = input()
+  if digit == '-':
+    sign = -1
+    digit = input()
+  while 1 == 1:
+    if digit < '0':
+      result *= sign
+      return result
+    if digit > '9':
+      result *= sign
+      return result
+    digit -= '0'
+    result *= 10
+    result += digit
+    digit = input()
+
+print('Type in a simple calculation using two operants\n')
+print('and one of +, -, * or / with spaces between,\n')
+print('e.g. '132 / 17'\n')
+
+left = parseInt()
+op = input()
+space = input()
+right = parseInt()
+found = 0
+if op == '+':
+  result = left + right
+  found = 1
+if op == '-':
+  right *= -1
+  result = left + right
+  right *= -1
+  found = 1
+if op == '*':
+  result = left * right
+  found = 1
+if op == '/':
+  result = divide(left,right)
+  found = 1
+if found == 1:
+  format(left)
+  print(' ')
+  print(op)
+  print(' ')
+  format(right)
+  print(' = ')
+  format(result)
+if found == 0:
+  print('Unknown operator: ')
+  print(op)
+print('\n')
+
