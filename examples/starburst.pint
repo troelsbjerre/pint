@@ -1,0 +1,128 @@
+def parseInt():
+  result = 0
+  sign = 1
+  digit = input()
+  if digit == '-':
+    sign = -1
+    digit = input()
+  while 1 == 1:
+    if digit < '0':
+      result *= sign
+      return result
+    if digit > '9':
+      result *= sign
+      return result
+    digit -= '0'
+    result *= 10
+    result += digit
+    digit = input()
+
+def format(number):
+  if number == 0:
+    print('0')
+  if number < 0:
+    print('-')
+    number *= -1
+  printDigits(number)
+
+def printDigits(number):
+  quotient, remainder = divide(number, 10)
+  if quotient > 0:
+    printDigits(quotient)
+  remainder += '0'
+  print(remainder)
+
+def divide(dividend, divisor):
+  if dividend < divisor:
+    return 0, dividend
+  doubledivisor = divisor * 2
+  halfquotient, remainder = divide(dividend, doubledivisor)
+  quotient = halfquotient * 2
+  if remainder >= divisor:
+    divisor *= -1
+    remainder += divisor
+    quotient += 1
+  return quotient, remainder
+
+def random(range):
+  rand *= 1664525
+  rand += 1013904223
+  rand, rand = divide(rand, 4294967296)
+  res,res = divide(rand, range)
+  return res
+
+def flare(xpos, ypos, deltax, deltay, accel, steps):
+  while steps > 0:
+    steps -= 1
+    xpos += deltax
+    ypos += deltay
+    deltay += accel
+    col = divide(xpos, 100)
+    row = divide(ypos, 100)
+    print(27)
+    print('[')
+    format(row)
+    print(';')
+    format(col)
+    print('H*')
+
+def parseWithDefault(default):
+  value = parseInt()
+  if value <= 0:
+    return default
+  return value
+
+print('Type random seed (default 0): ')
+rand = parseInt()
+print('Type number of bursts (default 15): ')
+bursts = parseWithDefault(15)
+print('Type number of flares per burst (default 20): ')
+numflares = parseWithDefault(20)
+print('Type y offset (default 20): ')
+yoffset = parseWithDefault(20)
+yoffset *= 100
+print('Type y range (default 60): ')
+yrange = parseWithDefault(60)
+yrange *= 100
+print('Type x offset (default 20): ')
+xoffset = parseWithDefault(20)
+xoffset *= 100
+print('Type x range (default 450): ')
+xrange = parseWithDefault(450)
+xrange *= 100
+
+print(27)
+print('[2J')
+print(27)
+print('[H')
+color = 100
+while bursts > 0:
+  bursts -= 1
+  flares = numflares
+  color += 1
+  if color == 108:
+    color = 101
+  print(27)
+  print('[')
+  format(color)
+  print('m')
+  initx = random(xrange)
+  initx += xoffset
+  inity = random(yrange)
+  inity += yoffset
+  while flares > 0:
+    dx = 0
+    dy = 0
+    speed = 0
+    while speed < 10000:
+      dx = random(401)
+      dx -= 200
+      dy = random(401)
+      dy -= 200
+      dxdx = dx * dx
+      dydy = dy * dy
+      speed = dxdx + dydy
+    flare(initx, inity, dx, dy, 5, 20)
+    flares -= 1
+print(27)
+print('[H')
