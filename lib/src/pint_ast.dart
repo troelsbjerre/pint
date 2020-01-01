@@ -12,6 +12,8 @@ BigInt tryParseBigIntOrChar(String input) {
 }
 
 abstract class Instruction {
+  Instruction next, parent;
+  int codeIndex;
   Instruction();
 
   Iterable<String> toPython([int indent = 0]);
@@ -41,11 +43,23 @@ abstract class Instruction {
 }
 
 abstract class Block extends Instruction {
-  var children = <Instruction>[];
+  Instruction firstChild, lastChild;
+
+  Iterable<Instruction> get children sync* {
+    for (var child = firstChild ; child != null ; child = child.next) {
+      yield child;
+    }
+  }
 
   @override
   bool addChild(Instruction child) {
-    children.add(child);
+    child.parent = this;
+    if (firstChild == null) {
+      firstChild = lastChild = child;
+    } else {
+      lastChild.next = child;
+      lastChild = child;
+    }
     return true;
   }
 
@@ -107,6 +121,11 @@ class Op extends Instruction {
   @override
   List<BigInt> encode(Map<String, int> locals, Map<String, int> globals,
       Map<String, Definition> functions, int opnum) {
+    if (codeIndex == null) {
+      codeIndex = opnum;
+    } else {
+      assert(codeIndex == opnum);
+    }
     var code = [op == '+' ? B(1) : B(2), null, null, null];
     var val = tryParseBigIntOrChar(left);
     if (val != null) {
@@ -179,6 +198,11 @@ class Input extends Instruction {
   @override
   List<BigInt> encode(Map<String, int> locals, Map<String, int> globals,
       Map<String, Definition> functions, int opnum) {
+    if (codeIndex == null) {
+      codeIndex = opnum;
+    } else {
+      assert(codeIndex == opnum);
+    }
     var offset = globals[target];
     if (offset != null) {
       return [B(3), B(offset)];
@@ -221,6 +245,11 @@ class Output extends Instruction {
   @override
   List<BigInt> encode(Map<String, int> locals, Map<String, int> globals,
       Map<String, Definition> functions, int opnum) {
+    if (codeIndex == null) {
+      codeIndex = opnum;
+    } else {
+      assert(codeIndex == opnum);
+    }
     var val = tryParseBigIntOrChar(arg);
     if (val != null) {
       return [B(104), val];
@@ -278,6 +307,11 @@ class Conditional extends Block {
   @override
   List<BigInt> encode(Map<String, int> locals, Map<String, int> globals,
       Map<String, Definition> functions, int opnum) {
+    if (codeIndex == null) {
+      codeIndex = opnum;
+    } else {
+      assert(codeIndex == opnum);
+    }
     if (op == '>' || op == '<=') {
       op = op == '>' ? '<' : '>=';
       var tmp = left;
@@ -346,7 +380,6 @@ var funRegExp = RegExp(
 
 class Definition extends Block {
   String name;
-  int codeIndex;
   List<String> args;
 
   @override
@@ -394,9 +427,9 @@ class Definition extends Block {
         .whereType<Return>()
         .map((ins) => ins.expr.length)
         .fold(0, max);
-    if (children.isEmpty || !(children.last is Return)) {
+    if (!(lastChild is Return)) {
       // to ensure that execution never overflows function
-      children.add(Return.tryParse('return'));
+      addChild(Return.tryParse('return'));
     }
     locals = {
       '_return_to': 0,
@@ -452,6 +485,11 @@ class Call extends Instruction {
   @override
   List<BigInt> encode(Map<String, int> locals, Map<String, int> globals,
       Map<String, Definition> functions, int opnum) {
+    if (codeIndex == null) {
+      codeIndex = opnum;
+    } else {
+      assert(codeIndex == opnum);
+    }
     var codes = <BigInt>[];
     for (var i = 0 ; i < args.length ; ++i) {
       var code = [
@@ -525,6 +563,11 @@ class Return extends Instruction {
   @override
   List<BigInt> encode(Map<String, int> locals, Map<String, int> globals,
       Map<String, Definition> functions, int opnum) {
+    if (codeIndex == null) {
+      codeIndex = opnum;
+    } else {
+      assert(codeIndex == opnum);
+    }
     var codes = <BigInt>[];
     for (var i = 0; i < expr.length; ++i) {
       var code = [
@@ -552,11 +595,6 @@ class Return extends Instruction {
 
 class Main extends Block {
   @override
-  bool addChild(Instruction ins) {
-    return super.addChild(ins);
-  }
-
-  @override
   Iterable<String> get readVariables => [];
 
   @override
@@ -581,6 +619,11 @@ class Main extends Block {
   @override
   List<BigInt> encode(Map<String, int> locals, Map<String, int> globals,
       Map<String, Definition> functions, int opnum) {
+    if (codeIndex == null) {
+      codeIndex = opnum;
+    } else {
+      assert(codeIndex == opnum);
+    }
     locals = {'_cmp': 0}; // reserved comparison register
     globals = {'_cmp': 0};
     functions = {for (var func in descendants.whereType<Definition>()) func.name : func};
