@@ -71,13 +71,35 @@ class IntCode {
         }
         stdout.writeln();
       }
-      var op = d[pc].toInt() % 100;
-      var a1 =
-          [d[pc + B1], pc + B1, rel + d[pc + B1]][d[pc].toInt() ~/ 100 % 10];
-      var a2 =
-          [d[pc + B2], pc + B2, rel + d[pc + B2]][d[pc].toInt() ~/ 1000 % 10];
-      var a3 =
-          [d[pc + B3], pc + B3, rel + d[pc + B3]][d[pc].toInt() ~/ 10000 % 10];
+      var op = d[pc].toInt();
+      BigInt a1, a2, a3;
+      if (op >= 20000) {
+        op -= 20000;
+        a3 = rel + d[pc + B3];
+      } else if (op >= 10000) {
+        op -= 10000;
+        a3 = pc + B3;
+      } else {
+        a3 = d[pc + B3];
+      }
+      if (op >= 2000) {
+        op -= 2000;
+        a2 = rel + d[pc + B2];
+      } else if (op >= 1000) {
+        op -= 1000;
+        a2 = pc + B2;
+      } else {
+        a2 = d[pc + B2];
+      }
+      if (op >= 200) {
+        op -= 200;
+        a1 = rel + d[pc + B1];
+      } else if (op >= 100) {
+        op -= 100;
+        a1 = pc + B1;
+      } else {
+        a1 = d[pc + B1];
+      }
       if (verbose) {
         stdout.writeln('$pc: ${disasseble(op, a1, a2, a3)}');
       }
